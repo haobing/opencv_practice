@@ -1,0 +1,19 @@
+直方图均衡化是通过拉伸像素强度分布范围来增强图像对比度的一种方法.
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp> 
+#include <iostream> 
+#include <opencv2/opencv.hpp>
+using namespace cv;
+using namespace std;
+
+int main()
+{
+	Mat src,dst;
+	src = imread("cat.jpg",1);
+	cvtColor(src,src,CV_BGR2GRAY);
+	equalizeHist(src,dst);
+	imshow("原图",src);
+	imshow("直方图均衡化",dst);
+	waitKey(0);
+}
