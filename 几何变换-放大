@@ -1,0 +1,50 @@
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp> 
+#include <iostream> 
+#include <opencv2/opencv.hpp>
+using namespace cv;
+using namespace std;
+
+Mat src,dst;
+Mat map_x,map_y;
+char *remap_window = "remap demo";
+int ind = 1;
+
+void update_map(void);
+
+int main()
+{
+	src = imread("cat.jpg",1);
+	dst.create(Size(src.cols*2,src.rows),src.type());
+	map_x.create(src.size(),CV_32FC1);
+	map_y.create(src.size(),CV_32FC1);
+	imshow("原图",src);
+	namedWindow(remap_window,CV_WINDOW_AUTOSIZE);
+	update_map();
+	imshow(remap_window,dst);
+	while(true)
+	{
+		int c = waitKey(100000);
+		if((char)c == 27)
+		{
+			break;
+		}
+		
+	}
+	return 0;
+}
+void update_map(void)
+{
+	for(int j=0;j<src.rows;j++)
+	{
+		for(int i=0;i<src.cols*2;i++)
+		{
+			dst.at<Vec3b>(j,i)[0] = src.at<Vec3b>(j,0.5*i)[0];
+			dst.at<Vec3b>(j,i)[1] = src.at<Vec3b>(j,0.5*i)[1];
+			dst.at<Vec3b>(j,i)[2] = src.at<Vec3b>(j,0.5*i)[2];
+			
+		}
+	}
+}
+
