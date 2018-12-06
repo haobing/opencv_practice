@@ -1,0 +1,133 @@
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp> 
+#include <opencv2/features2d/features2d.hpp>
+#include <iostream> 
+#include <opencv2/opencv.hpp>
+
+
+using namespace std;
+using namespace cv;  
+
+RNG rng(123456);
+bool verifySize(RotatedRect mr);
+int main()
+{
+	Mat src = imread("001.jpg",1);
+	Mat src_gray ;
+	
+//预处理
+	cvtColor(src,src_gray,CV_BGR2GRAY);//灰度化
+	Mat gaussianImg;
+	GaussianBlur(src_gray,gaussianImg,Size(3,3),0,0);//高斯滤波
+	Mat cannyImg;
+	//Canny(gaussianImg,cannyImg,100,200,3);//canny算子边缘检测
+	threshold(gaussianImg,cannyImg,80,255,THRESH_BINARY);
+	imshow("threshold",cannyImg);
+	
+	//Mat element = getStructuringElement(MORPH_RECT,Size(3,3));
+	//Mat closeImg;
+	//morphologyEx(cannyImg,cannyImg,MORPH_CLOSE,element);
+	//imshow("closing",cannyImg);
+	//medianBlur(cannyImg,cannyImg,3);
+	//imshow("sorce",src);
+	
+//车牌定位
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
+	findContours(cannyImg,contours,hierarchy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
+	Mat result(cannyImg.size(),CV_8U,Scalar(255));
+	vector<RotatedRect> plateRects;
+	for(int i=0;i<contours.size();i++)
+	{
+		RotatedRect rect = minAreaRect(contours[i]);
+		if(verifySize(rect))
+		{
+			plateRects.push_back(rect);
+		}
+	}
+	
+	printf("size=%d\n",plateRects.size());
+	Mat carPlate = src_gray(plateRects[0].boundingRect());
+	imshow("plateArea",carPlate);
+	
+//字符分割	
+	//GaussianBlur(carPlate,carPlate,Size(3,3),0,0);
+	threshold(carPlate,carPlate,130,240,THRESH_BINARY);
+	//Mat element = getStructuringElement(MORPH_RECT,Size(5,5));
+	//Mat closeImg;
+	//morphologyEx(carPlate,carPlate,MORPH_CLOSE,element);
+	imshow("carplate threshold",carPlate);
+	
+
+	vector<vector<Point>> contours2;
+	vector<Vec4i> hierarchy2;
+	findContours(carPlate,contours2,hierarchy2,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+	printf("the size=%d\n",contours2.size());
+	Mat contour_plate = carPlate.clone();
+	vector<RotatedRect> rects;
+	vector<float> point_x;
+	vector<float> widths;
+	vector<float> heights;
+	Point2f tempPoint[4];
+	vector<Mat> chars;
+	Mat image_roi;
+	float y0;
+	
+	for(int i=0;i<contours2.size();i++)
+	{
+		RotatedRect rect = minAreaRect(contours2[i]);
+		Point2f p[4];
+		rect.points(p);
+		if((p[0].y-p[1].y)>20&&(p[0].y-p[1].y)<100&&(p[2].x-p[1].x)>20&&(p[2].x-p[1].x)<100)
+		{
+			point_x.push_back(p[1].x);
+			widths.push_back(rect.size.width);
+			heights.push_back(rect.size.height);
+			rects.push_back(rect);
+			image_roi = contour_plate(Rect(p[1],rect.size));
+			chars.push_back(image_roi);
+			y0 = p[1].y;
+		}
+		for(int j=0;j<=3;j++)
+		{
+			line(contour_plate,p[j],p[(j+1)%4],Scalar(255,255,2));
+		}
+	}
+	imshow("contour_plate",contour_plate);
+	printf("char.size=%d\n",chars.size());
+	imshow("char000",chars[0]);
+	imshow("char001",chars[1]);
+	imshow("char002",chars[2]);
+	imshow("char003",chars[3]);
+	imshow("char004",chars[4]);
+	imshow("char005",chars[5]);
+	waitKey(0);
+	return 0;
+}
+
+bool verifySize(RotatedRect mr)
+{
+	float error = 0.2;
+	float scale = 3.6;
+	int min =20*scale*100;
+	int max = 300*scale*100;
+	
+	float rmin = 2.2;
+	float rmax = 4.2;
+	
+	int area = mr.size.height*mr.size.width;
+	float r = (float)mr.size.width/(float)mr.size.height;
+	if(r < 1)
+	{
+		r = (float)mr.size.height/(float)mr.size.width;
+	}
+	if((area<min||area>max)||(r<rmin||r>rmax))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
