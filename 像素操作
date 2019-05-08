@@ -1,0 +1,82 @@
+ #include<iostream>
+#include<opencv2/opencv.hpp>
+using namespace cv; 
+using namespace std;
+int main()
+{
+        Mat img_rgb,img_gry,img_canny;
+        img_rgb = imread("../picture/tree.jpg");
+
+        img_gry.create(img_rgb.rows,img_rgb.cols,CV_8UC);
+        img_gry.setTo(Scalar(255));
+        for(int i=0;i<img_rgb.cols;i++)
+        {
+                for(int j=0;j<img_rgb.rows;j++)
+                {
+                        Vec3b rgb = img_rgb.at<Vec3b>(j,i);
+                        img_gry.at<unsigned char>(j,i)[0] =0.299*rgb[0]+0.587*rgb[1]+0.114*rgb[2];
+                        //img_gry.at<Vec3b>(j,i)[1] = rgb[1]/2;
+                        //img_gry.at<Vec3b>(j,i)[2] = rgb[2]*2;
+                }
+        }
+        cout<<(unsigned int)img_rgb.at<Vec3b>(3,3)[0]<<" "<<(unsigned int)img_rgb.at<Vec3b>(3,3)[1]<<" "<<(unsigned int)img_rgb.at<Vec3b>(3,3)[2]<<endl;
+        namedWindow("img_gry",1);
+        imshow("img_rgb",img_rgb);
+        imshow("img_gry",img_gry);
+        cvtColor(img_rgb,img_canny,COLOR_BGR2GRAY);
+        imshow("img_canny",img_canny);
+        cout<<(unsigned int)img_canny.at<unsigned char>(3,3)<<endl;
+        waitKey(0);
+}
+
+
+#include<iostream>
+#include<opencv2/opencv.hpp>
+using namespace cv; 
+using namespace std;
+int main()
+{
+        Mat img_rgb,img_rgb2;
+        img_rgb = imread("../picture/tree.jpg");
+        //img_rgb2.create(img_rgb.rows,img_rgb.cols,CV_8UC3);
+        Mat img_rgb3(img_rgb.rows,img_rgb.cols,CV_8UC3,Scalar(0,255,255));
+        for(int i=0;i<img_rgb.rows;i++)
+        {
+                int n = img_rgb.cols*img_rgb.channels();
+                uchar *data = img_rgb.ptr<uchar>(i);//get the start address of the i rows
+                uchar *setdata = img_rgb3.ptr<uchar>(i);
+                for(int j = 0; j< n; j++)
+                {
+                        setdata[j] = data[j]/64*64;
+                }
+        }
+        imshow("img_rgb3",img_rgb3);
+    
+        waitKey(0);
+}
+
+
+#include<iostream>
+#include<opencv2/opencv.hpp>
+using namespace cv; 
+using namespace std;
+int main()
+{
+        Mat img_rgb,img_rgb2;
+        img_rgb = imread("../picture/tree.jpg");
+        img_rgb2 = img_rgb.clone();
+        Mat_<Vec3b>::iterator rgbit = img_rgb.begin<Vec3b>();
+        Mat_<Vec3b>::iterator rgbitend = img_rgb.end<Vec3b>();
+        Mat_<Vec3b>::iterator rgb2it = img_rgb2.begin<Vec3b>();
+        Mat_<Vec3b>::iterator rgb2itend = img_rgb2.end<Vec3b>();
+        imshow("img_rgb",img_rgb);
+        for(rgbit;rgbit!=rgbitend;rgbit++,rgb2it++)
+        {
+                (*rgb2it)[0] = (*rgbit)[0]/60*60;
+                (*rgb2it)[1] = (*rgbit)[1]/70*70;
+                (*rgb2it)[2] = (*rgbit)[2]/80*80;
+        }
+        imshow("img_rgb2",img_rgb2);
+        waitKey(0);
+}
+
