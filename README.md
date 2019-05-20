@@ -13,7 +13,8 @@ Scalar 它是一个四维点类；
 Size Size2f Size2i ,访问元素：width,height;
 Rect 矩形类，访问元素，x,y,width,height;
 RotatedRect 矩形类，访问元素，center(中心点）,size（大小）,angle（角度）；
-固定矩阵类：
+
+3、固定矩阵类：
 Matx33f f33(1,1,1,2,2,2)表示一个3x3的矩阵；
 Vec3f f3(1,2,3)表示一个列为3，行为1的矩阵；
 
@@ -22,5 +23,16 @@ Mat m,m.create(3,10,CV_32FC3),m.setTo(Scalar(1.0,0.0,1.0));；创建一个3行10
 Mat m(3,10,CV_32FC3,Scalar(1.0,0.0,1.0));
 构造函数，Mat(int rows,int cols,int type,Scalar()),Mat(Size s,int type,Scalar());Mat(Mat a ,Rect rc);
 m1 = m0.clone(),m0.copyTo(m1);
+
+4、绘图：
+cv::circle(Mat &img,Point center,int radius,Scalar color,int thickness = 1,int lineType = 8,int shift = 0);画一个 圆
+cv::clipLine(Rect imgRect,Point pt1,Point pt2);判断一条直线是否在给定的圆内；
+cv::ellipse(Mat img,Point center,Size axes,double angle,double startAngle,double endAngle,Scalar color,int thickness = 1,int lineType=8,int shift =0); 画一个椭圆；
+cv::ellipse2Poly(Point center,Size axes,double angle,double startAngle,double endAngle,int delta,vector<Point> pts);画一个近似椭圆的多边形；
+  cv::fillConvexPoly(Mat img,Point,pts,int npts,Scalar color,int lineType = 8, int shift = 0);画一个填充的简单多边形；
+  cv::fillPoly(Mat img,Point pts,int npts,int ncontours,Scalar color,int lineType=8,int shift=0,Point offset = Point());画一个填充的任意多边形；
+  cv::line(Mat img,Point pt1,Point pt2,Scalar color,int lineType=8,int shift = 0);画一条直线；
+  cv::rectangle(Mat img,Rect r,Scalar color,int lineType=8,int shift=0);画一个矩形；
+  cv::polyLines(Mat img,Point *pts,int npts,int ncontours,bool isClosed,Scalar color,int lineType=8,int shift=0);画多重折线；
 
 
