@@ -35,4 +35,11 @@ cv::ellipse2Poly(Point center,Size axes,double angle,double startAngle,double en
   cv::rectangle(Mat img,Rect r,Scalar color,int lineType=8,int shift=0);画一个矩形；
   cv::polyLines(Mat img,Point *pts,int npts,int ncontours,bool isClosed,Scalar color,int lineType=8,int shift=0);画多重折线；
 
+感兴趣区域提取
+方法1：
+Mat img = imread("1.jpg");
+Mat roi = img(Rect(500, 200, 100, 300));//Rect四个形参分别是：x坐标，y坐标，长，高；注意(x,y)指的是矩形的左上角点
+方法2：
+Mat img = imread("1.jpg");
+Mat roi = img(Range(250, 250 + 100), Range(200, 200 + 100));//Range两个形参分别是：起始行或列，起始行或列+偏移量
 
