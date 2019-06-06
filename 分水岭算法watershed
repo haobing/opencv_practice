@@ -1,0 +1,69 @@
+#include "test.h"
+int main()
+{
+	Mat image = imread("../picture/girl.jpg");
+	imshow("image",image);
+	Mat imageGray;
+	cvtColor(image,imageGray,CV_RGB2GRAY);
+	GaussianBlur(imageGray,imageGray,Size(5,5),0,0);
+	imshow("gray image",imageGray);
+	Canny(imageGray,imageGray,80,150,3);
+	imshow("canny",imageGray);
+
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
+
+	findContours(imageGray,contours,hierarchy,RETR_TREE,CHAIN_APPROX_SIMPLE,Point());
+	Mat imageContours = Mat::zeros(image.size(),CV_8UC1);
+	Mat marks(image.size(),CV_32S);
+	marks = Scalar::all(0);
+	int index = 0;
+	int compCount = 0;
+	int n = contours.size();
+	for(;index<n;index++)
+	{
+		drawContours(marks,contours,index,Scalar::all(index+1),1,8,hierarchy);
+		drawContours(imageContours,contours,index,Scalar(255),1,8,hierarchy);
+	}
+	Mat marksShows;
+	convertScaleAbs(marks,marksShows);
+	imshow("marksShow",marksShows);
+	imshow("lunkuo",imageContours);
+	watershed(image,marks);
+
+	Mat afterWatershed;
+	convertScaleAbs(marks,afterWatershed);
+	Mat PerspectiveImage = Mat::zeros(image.size(),CV_8UC3);
+	vector<Vec3b> randColor;
+	RNG rng;
+	for(int k =0;k<contours.size();k++)
+	{
+		int a = rng.uniform(0,k);
+		int b = rng.uniform(0,k);
+		int c = rng.uniform(0,k);
+		randColor.push_back(Vec3b(a,b,c));
+	}
+	for(int i=0;i<marks.rows;i++)
+	{
+		for(int j=0;j<marks.cols;j++)
+		{
+			int index = marks.at<int>(i,j);
+			if(index == -1)
+			{
+				PerspectiveImage.at<Vec3b>(i,j) = Vec3b(255,255,255);
+			}
+			else
+			{
+				PerspectiveImage.at<Vec3b>(i,j) = randColor[index];
+			}
+		}
+	}
+	imshow("after watershed",PerspectiveImage);
+	Mat wshed;
+	addWeighted(image,0.4,PerspectiveImage,0.6,0,wshed);
+	imshow("addWeighted image",wshed);
+
+	waitKey(0);
+}
+
+
